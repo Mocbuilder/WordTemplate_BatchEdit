@@ -3,6 +3,8 @@ using System.Reflection.Metadata;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using static System.Net.Mime.MediaTypeNames;
+using Serilog;
+using Microsoft.VisualBasic;
 
 namespace WordTemplate_BatchEdit
 {
@@ -10,7 +12,31 @@ namespace WordTemplate_BatchEdit
     {
         static void Main(string[] args)
         {
-            GetUserInput();
+            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string filePath = Path.Combine(appDataPath, "WordTemplate_BatchEdit", $"log-{DateTime.Now.ToShortDateString}.txt");
+
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+            Log.Logger = new LoggerConfiguration()
+            .WriteTo.File("application.txt", rollingInterval: RollingInterval.Minute)            
+            .CreateLogger();
+
+
+            try
+            {
+                Log.Information($"Log from: {DateTime.Now}");
+                Log.Information("Application started.");
+
+                GetUserInput();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "An error occurred.");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
 
         public static void GetUserInput()
@@ -51,7 +77,7 @@ namespace WordTemplate_BatchEdit
                     case 2:
                         Console.WriteLine("Enter path to CSV:");
                         string csvPath = Console.ReadLine();
-                        GetPathsFromCSV(csvPath);
+                        //GetPathsFromCSV(csvPath);
                         break;
                     case 3:
                         Console.WriteLine("Enter directory that contains the docs:");
@@ -129,6 +155,11 @@ namespace WordTemplate_BatchEdit
             }
 
             Console.WriteLine("Succesfully editet all files in the directory.");
+        }
+
+        public static void LogWrite(string message)
+        {
+            
         }
     }
 }
