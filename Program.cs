@@ -16,10 +16,24 @@ namespace WordTemplate_BatchEdit
             string logConfig = ConfigurationManager.AppSettings["GenerateLog"];
             bool generateLog = bool.TryParse(logConfig, out bool result) && result;
 
+            string costumLogDir = ConfigurationManager.AppSettings["CostumLogDir"];
 
-            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string filePath = Path.Combine(appDataPath, "WordTemplate_BatchEdit", $"log-.txt");
-            //{DateTime.Now.ToString("yyyy-MM-dd")}
+            string costumLogDirConfig = ConfigurationManager.AppSettings["UseCostumLogDir"];
+            bool useCostumLog = bool.TryParse(costumLogDirConfig, out bool result2) && result2;
+
+
+            string filePath;
+
+            if(useCostumLog == true) 
+            {
+                filePath = Path.Combine(costumLogDir, "WordTemplate_BatchEdit", "log-.txt");
+            }
+            else
+            {
+                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                filePath = Path.Combine(appDataPath, "WordTemplate_BatchEdit", "log-.txt");
+
+            }
 
             Directory.CreateDirectory(Path.GetDirectoryName(filePath));
 
