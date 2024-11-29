@@ -5,6 +5,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using static System.Net.Mime.MediaTypeNames;
 using Serilog;
 using Microsoft.VisualBasic;
+using System.Configuration;
 
 namespace WordTemplate_BatchEdit
 {
@@ -12,18 +13,27 @@ namespace WordTemplate_BatchEdit
     {
         static void Main(string[] args)
         {
-            
+            string logConfig = ConfigurationManager.AppSettings["GenerateLog"];
+            bool generateLog = bool.TryParse(logConfig, out bool result) && result;
+
+
             string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             string filePath = Path.Combine(appDataPath, "WordTemplate_BatchEdit", $"log-.txt");
             //{DateTime.Now.ToString("yyyy-MM-dd")}
 
             Directory.CreateDirectory(Path.GetDirectoryName(filePath));
 
-            Log.Logger = new LoggerConfiguration()
+            if (generateLog == true)
+            {
+                Log.Logger = new LoggerConfiguration()
                 .WriteTo.File(filePath, rollingInterval: RollingInterval.Minute)
                 .CreateLogger();
-
-
+            }
+            else
+            {
+                Log.Logger = new LoggerConfiguration()
+                .CreateLogger();
+            }
 
             try
             {
