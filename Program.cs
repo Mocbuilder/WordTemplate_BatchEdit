@@ -54,7 +54,7 @@ namespace WordTemplate_BatchEdit
                         Console.WriteLine("Enter directory that contains the docs:");
                         string rootDirPath = Console.ReadLine();
 
-                        string[] files = Directory.GetFiles(rootDirPath, "*.dotx");
+                        string[] files = Directory.GetFiles(rootDirPath, "*.dotx", SearchOption.AllDirectories);
 
                         for (int i = 0; i < files.Length; i++)
                         {
