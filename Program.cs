@@ -40,7 +40,7 @@ namespace WordTemplate_BatchEdit
             if (generateLog == true)
             {
                 Log.Logger = new LoggerConfiguration()
-                .WriteTo.File(filePath, rollingInterval: RollingInterval.Minute)
+                .WriteTo.File(filePath, rollingInterval: RollingInterval.Hour)
                 .CreateLogger();
             }
             else
