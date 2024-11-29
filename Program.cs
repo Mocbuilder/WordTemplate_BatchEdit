@@ -53,12 +53,12 @@ namespace WordTemplate_BatchEdit
                     case 3:
                         Console.WriteLine("Enter directory that contains the docs:");
                         string rootDirPath = Console.ReadLine();
+
                         string[] files = Directory.GetFiles(rootDirPath, "*.dotx");
 
                         for (int i = 0; i < files.Length; i++)
                         {
                             string tempGetName = files[i].Split('\\').Last();
-                            Console.ReadLine();
 
                             if(tempGetName.Contains("MGLG"))
                             {
@@ -104,14 +104,28 @@ namespace WordTemplate_BatchEdit
                 }
 
                 mainPart.Document.Save();
-                Console.WriteLine("Footer updated successfully!");
+                Console.WriteLine($"Footer updated successfully at {path}");
             }
 
         }
 
         public static void MultiDocEdit(string[] files)
         {
+            Console.WriteLine("Enter Text that should be replaced:");
+            string toSearch = Console.ReadLine();
 
+            Console.WriteLine("Enter Text that will replace it:");
+            string toReplace = Console.ReadLine();
+
+            foreach (var file in files)
+            {
+                if (file == "") continue;
+                else if (!File.Exists(file)) { Console.WriteLine($"{file} is not an existing directory."); continue; }
+
+                SearchAndEditDoc(file, toSearch, toReplace);
+            }
+
+            Console.WriteLine("Succesfully editet all files in the directory.");
         }
     }
 }
