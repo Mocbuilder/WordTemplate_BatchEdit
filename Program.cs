@@ -56,6 +56,10 @@ namespace WordTemplate_BatchEdit
 
                 GetUserInput();
             }
+            catch (FileFormatException fileFormatEx)
+            {
+                Log.Error(fileFormatEx, "An error occured.");
+            }
             catch (Exception ex)
             {
                 Log.Error(ex, "An error occurred.");
@@ -64,6 +68,7 @@ namespace WordTemplate_BatchEdit
             {
                 Log.CloseAndFlush();
             }
+            Console.ReadLine();
         }
 
         public static void GetUserInput()
@@ -160,6 +165,7 @@ namespace WordTemplate_BatchEdit
                     {
                         foreach (var run in paragraph.Elements<Run>())
                         {
+                            Console.WriteLine($"{path} is at run");
                             foreach (var text in run.Elements<DocumentFormat.OpenXml.Wordprocessing.Text>())
                             {
                                 if (text.Text.Contains(toSearch))
