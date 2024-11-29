@@ -110,13 +110,24 @@ namespace WordTemplate_BatchEdit
                         Console.WriteLine("Enter directory that contains the docs:");
                         string rootDirPath = Console.ReadLine();
 
+                        while (string.IsNullOrWhiteSpace(rootDirPath) || !Directory.Exists(rootDirPath))
+                        {
+                            Console.WriteLine("Invalid directory. Please enter a valid directory path:");
+                            rootDirPath = Console.ReadLine();
+
+                            if (rootDirPath.Equals("exit", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Environment.Exit(0);
+                            }
+                        }
+
                         string[] files = Directory.GetFiles(rootDirPath, "*.dotx", SearchOption.AllDirectories);
 
                         for (int i = 0; i < files.Length; i++)
                         {
                             string tempGetName = files[i].Split('\\').Last();
 
-                            if(tempGetName.Contains("MGLG"))
+                            if (tempGetName.Contains("MGLG"))
                             {
                                 files[i] = "";
                             }
