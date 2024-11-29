@@ -145,6 +145,7 @@ namespace WordTemplate_BatchEdit
 
         public static void SearchAndEditDoc(string path, string toSearch, string toReplace)
         {
+            Log.Information($"Editing file: {path}");
             using (WordprocessingDocument wordDoc = WordprocessingDocument.Open(path, true))
             {
                 var mainPart = wordDoc.MainDocumentPart;
@@ -173,7 +174,7 @@ namespace WordTemplate_BatchEdit
                 mainPart.Document.Save();
                 Console.WriteLine($"Footer updated successfully at {path}");
             }
-
+            Log.Information($"Succesfull Edit: {path}");
         }
 
         public static void MultiDocEdit(string[] files)
