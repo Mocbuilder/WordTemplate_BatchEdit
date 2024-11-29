@@ -51,7 +51,7 @@ namespace WordTemplate_BatchEdit
                     case 2:
                         Console.WriteLine("Enter path to CSV:");
                         string csvPath = Console.ReadLine();
-                        //GetPathsFromCSV(csvPath);
+                        GetPathsFromCSV(csvPath);
                         break;
                     case 3:
                         Console.WriteLine("Enter directory that contains the docs:");
