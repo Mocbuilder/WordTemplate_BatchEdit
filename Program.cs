@@ -17,13 +17,16 @@ namespace WordTemplate_BatchEdit
         {
             while (true)
             {
+                string userInput = "";
                 int userChoice = 0;
 
                 Console.WriteLine("Enter the path to a single doc (1) or path to a CSV with multiple paths (2) or directory with multiple docs (3) ?");
 
                 try
                 {
-                    userChoice = Convert.ToInt32(Console.ReadLine());
+                    userInput = Console.ReadLine();
+                    if (userInput == "exit") Environment.Exit(0);
+                    userChoice = Convert.ToInt32(userInput);
                 }
                 catch (Exception ex)
                 {
