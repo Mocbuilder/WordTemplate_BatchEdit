@@ -12,14 +12,17 @@ namespace WordTemplate_BatchEdit
     {
         static void Main(string[] args)
         {
+            
             string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string filePath = Path.Combine(appDataPath, "WordTemplate_BatchEdit", $"log-{DateTime.Now.ToShortDateString}.txt");
+            string filePath = Path.Combine(appDataPath, "WordTemplate_BatchEdit", $"log-.txt");
+            //{DateTime.Now.ToString("yyyy-MM-dd")}
 
             Directory.CreateDirectory(Path.GetDirectoryName(filePath));
 
             Log.Logger = new LoggerConfiguration()
-            .WriteTo.File("application.txt", rollingInterval: RollingInterval.Minute)            
-            .CreateLogger();
+                .WriteTo.File(filePath, rollingInterval: RollingInterval.Minute)
+                .CreateLogger();
+
 
 
             try
