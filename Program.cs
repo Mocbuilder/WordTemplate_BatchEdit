@@ -73,31 +73,6 @@ namespace WordTemplate_BatchEdit
                         Console.WriteLine("Invalid choice, please try again.");
                         break;
                 }
-
-                if (userChoice != 0 && userChoice == 1)
-                {
-                    Console.WriteLine("Enter path to document:");
-                    string docPath = Console.ReadLine();
-
-                    Console.WriteLine("Enter Text that should be replaced:");
-                    string toSearch = Console.ReadLine();
-
-                    Console.WriteLine("Enter Text that will replace it:");
-                    string toReplace = Console.ReadLine();
-
-
-                    SearchAndEditDoc(docPath, toSearch, toReplace);
-                }
-                else if (userChoice != 0 && userChoice == 2)
-                {
-                    Console.WriteLine("Enter path to CSV:");
-                    string csvPath = Console.ReadLine();
-                    //GetPathsFromCSV(csvPath);
-                }
-                else
-                {
-                    Console.WriteLine("Invalid choice. Please try again.");
-                }
             }
         }
 
