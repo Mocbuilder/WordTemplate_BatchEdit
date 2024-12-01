@@ -54,6 +54,7 @@ namespace WordTemplate_BatchEdit
                 Log.Information($"Log from: {DateTime.Now}");
                 Log.Information("Application started.");
 
+                CLI.StartCLI(args);
                 GetUserInput();
             }
             catch (FileFormatException fileFormatEx)
