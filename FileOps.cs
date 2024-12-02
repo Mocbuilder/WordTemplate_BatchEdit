@@ -15,7 +15,7 @@ namespace WordTemplate_BatchEdit
 {
     public class FileOps
     {
-        public static void DocSRFooter(string path, string search, string replace)
+        public static void SR_SingleFileFooter(string path, string search, string replace)
         {
             if (!File.Exists(path)) { Console.WriteLine($"File path '{path}' is invalid"); return; }
 
@@ -25,6 +25,80 @@ namespace WordTemplate_BatchEdit
                 var mainPart = wordDoc.MainDocumentPart;
 
                 var footerParts = mainPart.FooterParts;
+
+                foreach (var footerPart in footerParts)
+                {
+                    var footer = footerPart.Footer;
+
+                    foreach (var paragraph in footer.Elements<Paragraph>())
+                    {
+                        foreach (var run in paragraph.Elements<Run>())
+                        {
+                            Log.Information($"{path} is at run");
+                            foreach (var text in run.Elements<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                            {
+                                if (text.Text.Contains(search))
+                                {
+                                    text.Text = text.Text.Replace(search, replace);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mainPart.Document.Save();
+                Log.Information($"Footer updated successfully at {path}");
+            }
+            Log.Information($"Succesfull Edit: {path}");
+        }
+
+        public static void SR_SingleFileHeader(string path, string search, string replace)
+        {
+            if (!File.Exists(path)) { Console.WriteLine($"File path '{path}' is invalid"); return; }
+
+            Log.Information($"Editing file: {path}");
+            using (WordprocessingDocument wordDoc = WordprocessingDocument.Open(path, true))
+            {
+                var mainPart = wordDoc.MainDocumentPart;
+
+                var headerParts = mainPart.HeaderParts;
+
+                foreach (var headerPart in headerParts)
+                {
+                    var header = headerPart.Header;
+
+                    foreach (var paragraph in header.Elements<Paragraph>())
+                    {
+                        foreach (var run in paragraph.Elements<Run>())
+                        {
+                            Log.Information($"{path} is at run");
+                            foreach (var text in run.Elements<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                            {
+                                if (text.Text.Contains(search))
+                                {
+                                    text.Text = text.Text.Replace(search, replace);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mainPart.Document.Save();
+                Log.Information($"Header updated successfully at {path}");
+            }
+            Log.Information($"Succesfull Edit: {path}");
+        }
+
+        public static void SR_SingleFileBody(string path, string search, string replace)
+        {
+            if (!File.Exists(path)) { Console.WriteLine($"File path '{path}' is invalid"); return; }
+
+            Log.Information($"Editing file: {path}");
+            using (WordprocessingDocument wordDoc = WordprocessingDocument.Open(path, true))
+            {
+                var mainPart = wordDoc.MainDocumentPart;
+
+                var footerParts = mainPart.Parts;
 
                 foreach (var footerPart in footerParts)
                 {

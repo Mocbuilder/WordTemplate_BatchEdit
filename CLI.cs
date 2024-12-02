@@ -12,33 +12,83 @@ namespace WordTemplate_BatchEdit
     {
         public static string userInput;
 
-        public static void StartCLI(string[] args)
+        public static async void StartCLI(string[] args)
         {
             Logo();
 
-            var rootCommand = new RootCommand("CLI tool for working with .dotx files");
-            var srCommand = new Command("sr", "Perform search and replace in a single file")
+            var rootCommand = new RootCommand("A tool for batch editing .dotx files (Word Document Templates).");
+
+            var singleFileOption = new Option<FileInfo?>(
+                name: "--file",
+                description: "The file to read and display on the console."
+            )
             {
-                new Option<string>("--path", "Path to the .dotx file") { IsRequired = true },
-                new Option<string>("--search", "Text to search for") { IsRequired = true },
-                new Option<string>("--replace", "Text to replace with") { IsRequired = true }
+                IsRequired = true,
             };
 
-srCommand.SetHandler<string, string, string>(
-                HandleSearchAndReplace,
-                srCommand.Options[0],
-                srCommand.Options[1],
-                srCommand.Options[2]);
-            rootCommand.AddCommand(srCommand);
+            var sr_sectionOption = new Option<string>(
+                name: "--section",
+                description: "The section of the file to process (head, body, footer)."
+            )
+            {
+                IsRequired = true
+            };
+            sr_sectionOption.AddCompletions("head", "body", "footer");
+
+            var sr_searchOption = new Option<string>(
+                name: "--search",
+                description: "The text that is going to be searched for."
+            )
+            {
+                IsRequired = true
+            };
+
+            var sr_replaceOption = new Option<string>(
+                name: "--search",
+                description: "The text that is going to be searched for."
+            )
+            {
+                IsRequired = true
+            };
+
+            var srSingleFileCommand = new Command("read", "Read and display the file.")
+            {
+                singleFileOption,
+                sr_sectionOption,
+                sr_searchOption,
+                sr_replaceOption
+            };
+            rootCommand.AddCommand(srSingleFileCommand);
+
+            srSingleFileCommand.SetHandler(async (singleFile, sectionOption, sr_searchOption, sr_replaceOption) =>
+            {
+                await sr_SingleFilePartRouting(singleFile!, sectionOption, sr_searchOption, sr_replaceOption);
+            }, singleFileOption, sr_sectionOption, sr_searchOption, sr_replaceOption);
+
+            await rootCommand.InvokeAsync(args);
         }
 
-        public static void HandleSearchAndReplace(string path, string search, string replace)
+        static async Task sr_SingleFilePartRouting(
+            FileInfo file, string sectionOption, string search, string replace)
         {
-            // Perform the logic here (synchronous)
-            FileOps.DocSRFooter(path, search, replace);
-
-            // Return Task.CompletedTask to satisfy the async signature
-            //return Task.CompletedTask;
+            switch (sectionOption)
+            {
+                case "header":
+                    FileOps.SR_SingleFileHeader(file.FullName, search, replace);
+                    break;
+                case "body":
+                    FileOps.SR_SingleFileBody(file.FullName, search, replace);
+                    break;
+                case "footer":
+                    FileOps.SR_SingleFileFooter(file.FullName, search, replace);
+                    break;
+                case "all":
+                    FileOps.SR_SingleFileAll(file.FullName, search, replace);
+                    break;
+                default:
+                    FileOps.SR_SingleFileAll(file.FullName, search, replace);
+                    break;
+            }
         }
 
         public static void Logo()
