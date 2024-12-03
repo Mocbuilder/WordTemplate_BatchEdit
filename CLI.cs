@@ -79,7 +79,7 @@ namespace WordTemplate_BatchEdit
 
             sr_SingleFileCommand.SetHandler(async (singleFile, sectionOption, sr_searchOption, sr_replaceOption) =>
             {
-                await sr_SingleFile_PartSpecificRouting(singleFile!, sectionOption, sr_searchOption, sr_replaceOption);
+                await SR_SingleFile_PartSpecificRouting(singleFile!, sectionOption, sr_searchOption, sr_replaceOption);
             }, singleFileOption, sr_sectionOption, sr_searchOption, sr_replaceOption);
 
 
@@ -93,14 +93,14 @@ namespace WordTemplate_BatchEdit
 
             meta_SingleFileCommand.SetHandler(async (singleFile, dump, output) =>
             {
-                await meta_SingleFile_GetMetaData(singleFile!, dump, output);
+                await META_SingleFile_GetMetaData(singleFile!, dump, output);
             }, singleFileOption, meta_dumpOption, meta_outputPathOption);
             #endregion Commands
 
             await rootCommand.InvokeAsync(args);
         }
 
-        static async Task sr_SingleFile_PartSpecificRouting(
+        static async Task SR_SingleFile_PartSpecificRouting(
             FileInfo file, string sectionOption, string search, string replace)
         {
             switch (sectionOption)
@@ -123,7 +123,7 @@ namespace WordTemplate_BatchEdit
             }
         }
 
-        static async Task meta_SingleFile_GetMetaData(FileInfo file, string dump, string outputPath)
+        static async Task META_SingleFile_GetMetaData(FileInfo file, string dump, string outputPath)
         {
             Dictionary<string, string> metadata = new Dictionary<string, string>();
 
