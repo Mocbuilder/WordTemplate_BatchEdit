@@ -5,6 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.CommandLine;
 using Serilog;
+using WordTemplate_BatchEdit.FileOps;
+using DocumentFormat.OpenXml.Packaging;
+using System.Text.Json;
 
 namespace WordTemplate_BatchEdit
 {
@@ -12,12 +15,13 @@ namespace WordTemplate_BatchEdit
     {
         public static string userInput;
 
-        public static async void StartCLI(string[] args)
+        public static async void InitCLI(string[] args)
         {
             Logo();
 
             var rootCommand = new RootCommand("A tool for batch editing .dotx files (Word Document Templates).");
 
+            #region Options
             var singleFileOption = new Option<FileInfo?>(
                 name: "--file",
                 description: "The file to read and display on the console."
@@ -51,49 +55,125 @@ namespace WordTemplate_BatchEdit
                 IsRequired = true
             };
 
-            var srSingleFileCommand = new Command("read", "Read and display the file.")
+            var meta_dumpOption = new Option<string>(
+                name: "--dump",
+                description: "Dump the meta-data as json to the output directory"
+            );
+            meta_dumpOption.AddCompletions("true", "false");
+
+            var meta_outputPathOption = new Option<string>(
+                name: "--output",
+                description: "The output directory for the meta-data dump file."
+            );
+            #endregion Options
+
+            #region Commands
+            var sr_SingleFileCommand = new Command("read", "Read and display the file.")
             {
                 singleFileOption,
                 sr_sectionOption,
                 sr_searchOption,
                 sr_replaceOption
             };
-            rootCommand.AddCommand(srSingleFileCommand);
+            rootCommand.AddCommand(sr_SingleFileCommand);
 
-            srSingleFileCommand.SetHandler(async (singleFile, sectionOption, sr_searchOption, sr_replaceOption) =>
+            sr_SingleFileCommand.SetHandler(async (singleFile, sectionOption, sr_searchOption, sr_replaceOption) =>
             {
-                await sr_SingleFilePartRouting(singleFile!, sectionOption, sr_searchOption, sr_replaceOption);
+                await sr_SingleFile_PartSpecificRouting(singleFile!, sectionOption, sr_searchOption, sr_replaceOption);
             }, singleFileOption, sr_sectionOption, sr_searchOption, sr_replaceOption);
+
+
+            var meta_SingleFileCommand = new Command("meta", "Get and optionaly dump the meta-data of a .dotx file.")
+            {
+                singleFileOption,
+                meta_dumpOption,
+                meta_outputPathOption
+            };
+            rootCommand.AddCommand(meta_SingleFileCommand);
+
+            meta_SingleFileCommand.SetHandler(async (singleFile, dump, output) =>
+            {
+                await meta_SingleFile_GetMetaData(singleFile!, dump, output);
+            }, singleFileOption, meta_dumpOption, meta_outputPathOption);
+            #endregion Commands
 
             await rootCommand.InvokeAsync(args);
         }
 
-        static async Task sr_SingleFilePartRouting(
+        static async Task sr_SingleFile_PartSpecificRouting(
             FileInfo file, string sectionOption, string search, string replace)
         {
             switch (sectionOption)
             {
                 case "header":
-                    FileOps.SR_SingleFileHeader(file.FullName, search, replace);
+                    SR_FileOps.SR_SingleFileHeader(file.FullName, search, replace);
                     break;
                 case "body":
-                    FileOps.SR_SingleFileBody(file.FullName, search, replace);
+                    SR_FileOps.SR_SingleFileBody(file.FullName, search, replace);
                     break;
                 case "footer":
-                    FileOps.SR_SingleFileFooter(file.FullName, search, replace);
+                    SR_FileOps.SR_SingleFileFooter(file.FullName, search, replace);
                     break;
                 case "all":
-                    FileOps.SR_SingleFileAll(file.FullName, search, replace);
+                    SR_FileOps.SR_SingleFileAll(file.FullName, search, replace);
                     break;
                 default:
-                    FileOps.SR_SingleFileAll(file.FullName, search, replace);
+                    SR_FileOps.SR_SingleFileAll(file.FullName, search, replace);
                     break;
             }
         }
 
+        static async Task meta_SingleFile_GetMetaData(FileInfo file, string dump, string outputPath)
+        {
+            Dictionary<string, string> metadata = new Dictionary<string, string>();
+
+            using (WordprocessingDocument wordDoc = WordprocessingDocument.Open(file.FullName, false))
+            {
+                var coreProperties = wordDoc.PackageProperties;
+
+                Console.WriteLine("Core Properties:");
+                Console.WriteLine($"Title: {coreProperties.Title}");
+                Console.WriteLine($"Author: {coreProperties.Creator}");
+                Console.WriteLine($"Subject: {coreProperties.Subject}");
+                Console.WriteLine($"Description: {coreProperties.Description}");
+                Console.WriteLine($"Keywords: {coreProperties.Keywords}");
+                Console.WriteLine($"Last Modified By: {coreProperties.LastModifiedBy}");
+                Console.WriteLine($"Created Date: {coreProperties.Created}");
+                Console.WriteLine($"Modified Date: {coreProperties.Modified}");
+
+                metadata.Add("Title", coreProperties.Title!);
+                metadata.Add("Author", coreProperties.Creator!);
+                metadata.Add("Subject", coreProperties.Subject!);
+                metadata.Add("Description", coreProperties.Description!);
+                metadata.Add("Keywords", coreProperties.Keywords!);
+                metadata.Add("LastModBy", coreProperties.LastModifiedBy!);
+                metadata.Add("CreatedDate", coreProperties.Created?.ToString("o")!);
+                metadata.Add("ModifiedDate", coreProperties.Modified?.ToString("o")!);
+
+                var customProperties = wordDoc.ExtendedFilePropertiesPart?.Properties;
+
+                if (customProperties != null)
+                {
+                    Console.WriteLine("\nCustom Properties:");
+                    foreach (var property in customProperties.Elements<DocumentFormat.OpenXml.CustomProperties.CustomDocumentProperty>())
+                    {
+                        Console.WriteLine($"{property.Name}: {property.InnerText}");
+                        metadata.Add(property.Name!, property.InnerText!);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("\nNo custom properties found.");
+                }
+
+                string json = JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText("metadata.json", json);
+
+            }
+        }
         public static void Logo()
         {
-            Console.WriteLine(@"
+                Console.WriteLine(@"
   _____        _  __   __           ____        _       _     ______    _ _ _             
  |  __ \      | | \ \ / /          |  _ \      | |     | |   |  ____|  | (_) |            
  | |  | | ___ | |_ \ V /   ______  | |_) | __ _| |_ ___| |__ | |__   __| |_| |_ ___  _ __ 
@@ -103,7 +183,8 @@ namespace WordTemplate_BatchEdit
                                                                                           
                                                                                           
             
-            ");
+                ");
+            
         }
     }
 }
