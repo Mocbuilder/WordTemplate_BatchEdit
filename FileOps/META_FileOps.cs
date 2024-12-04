@@ -16,7 +16,7 @@ namespace WordTemplate_BatchEdit.FileOps
 
             if (!File.Exists(output))
             {
-
+                //set as working dir
             }
 
             using (WordprocessingDocument wordDoc = WordprocessingDocument.Open(file.FullName, false))
