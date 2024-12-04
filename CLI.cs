@@ -32,12 +32,12 @@ namespace WordTemplate_BatchEdit
 
             var sr_sectionOption = new Option<string>(
                 name: "--section",
-                description: "The section of the file to process (head, body, footer)."
+                description: "The section of the file to process (header, body, footer, all)."
             )
             {
                 IsRequired = true
             };
-            sr_sectionOption.AddCompletions("head", "body", "footer");
+            sr_sectionOption.AddCompletions("header", "body", "footer", "all");
 
             var sr_searchOption = new Option<string>(
                 name: "--search",
@@ -48,7 +48,7 @@ namespace WordTemplate_BatchEdit
             };
 
             var sr_replaceOption = new Option<string>(
-                name: "--search",
+                name: "--replace",
                 description: "The text that is going to be searched for."
             )
             {
@@ -68,7 +68,7 @@ namespace WordTemplate_BatchEdit
             #endregion Options
 
             #region Commands
-            var sr_SingleFileCommand = new Command("read", "Read and display the file.")
+            var sr_SingleFileCommand = new Command("sr", "Search and replace text in a dotx file.")
             {
                 singleFileOption,
                 sr_sectionOption,
@@ -93,7 +93,7 @@ namespace WordTemplate_BatchEdit
 
             meta_SingleFileCommand.SetHandler(async (singleFile, dump, output) =>
             {
-                await META_SingleFile_GetMetaData(singleFile!, dump, output);
+                await META_FileOps.META_SingleFile_GetMetaData(singleFile!, dump, output);
             }, singleFileOption, meta_dumpOption, meta_outputPathOption);
             #endregion Commands
 
@@ -123,54 +123,7 @@ namespace WordTemplate_BatchEdit
             }
         }
 
-        static async Task META_SingleFile_GetMetaData(FileInfo file, string dump, string outputPath)
-        {
-            Dictionary<string, string> metadata = new Dictionary<string, string>();
 
-            using (WordprocessingDocument wordDoc = WordprocessingDocument.Open(file.FullName, false))
-            {
-                var coreProperties = wordDoc.PackageProperties;
-
-                Console.WriteLine("Core Properties:");
-                Console.WriteLine($"Title: {coreProperties.Title}");
-                Console.WriteLine($"Author: {coreProperties.Creator}");
-                Console.WriteLine($"Subject: {coreProperties.Subject}");
-                Console.WriteLine($"Description: {coreProperties.Description}");
-                Console.WriteLine($"Keywords: {coreProperties.Keywords}");
-                Console.WriteLine($"Last Modified By: {coreProperties.LastModifiedBy}");
-                Console.WriteLine($"Created Date: {coreProperties.Created}");
-                Console.WriteLine($"Modified Date: {coreProperties.Modified}");
-
-                metadata.Add("Title", coreProperties.Title!);
-                metadata.Add("Author", coreProperties.Creator!);
-                metadata.Add("Subject", coreProperties.Subject!);
-                metadata.Add("Description", coreProperties.Description!);
-                metadata.Add("Keywords", coreProperties.Keywords!);
-                metadata.Add("LastModBy", coreProperties.LastModifiedBy!);
-                metadata.Add("CreatedDate", coreProperties.Created?.ToString("o")!);
-                metadata.Add("ModifiedDate", coreProperties.Modified?.ToString("o")!);
-
-                var customProperties = wordDoc.ExtendedFilePropertiesPart?.Properties;
-
-                if (customProperties != null)
-                {
-                    Console.WriteLine("\nCustom Properties:");
-                    foreach (var property in customProperties.Elements<DocumentFormat.OpenXml.CustomProperties.CustomDocumentProperty>())
-                    {
-                        Console.WriteLine($"{property.Name}: {property.InnerText}");
-                        metadata.Add(property.Name!, property.InnerText!);
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("\nNo custom properties found.");
-                }
-
-                string json = JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText("metadata.json", json);
-
-            }
-        }
         public static void Logo()
         {
                 Console.WriteLine(@"

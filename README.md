@@ -11,3 +11,5 @@ This tool currently has only a prerelease version available for download. Expect
 - Uses the OpenXML SDK from Microsoft for file operations on Office-Files.
 
 - Uses Serilog for Logging.
+
+- Uses System.CommandLine (a prerelease of the official development version from Microsoft.)
