@@ -12,35 +12,31 @@ namespace WordTemplate_BatchEdit.FileOps
     {
         public static async Task META_SingleFile_GetMetaData(FileInfo file, string dump, string output)
         {
-            Dictionary<string, string> metadata = new Dictionary<string, string>();
-
-            if (!File.Exists(output))
+            //if directory (as in: a valid FOLDER) doesnt exist, you'll create a file to dump it at that location. That way users cant specify an existing file, but who dumps into an already existing file anyway ?
+            if (!Directory.Exists(output))
             {
-                //set as working dir
+                output = Path.Combine(Directory.GetCurrentDirectory + $@"\metadata_{file.FullName}.json");
             }
 
             using (WordprocessingDocument wordDoc = WordprocessingDocument.Open(file.FullName, false))
             {
                 var coreProperties = wordDoc.PackageProperties;
 
-                Console.WriteLine("Core Properties:");
-                Console.WriteLine($"Title: {coreProperties.Title}");
-                Console.WriteLine($"Author: {coreProperties.Creator}");
-                Console.WriteLine($"Subject: {coreProperties.Subject}");
-                Console.WriteLine($"Description: {coreProperties.Description}");
-                Console.WriteLine($"Keywords: {coreProperties.Keywords}");
-                Console.WriteLine($"Last Modified By: {coreProperties.LastModifiedBy}");
-                Console.WriteLine($"Created Date: {coreProperties.Created}");
-                Console.WriteLine($"Modified Date: {coreProperties.Modified}");
+                //Dictionary for the printing AND dumping \O/
+                var metadata = new Dictionary<string, string?>
+                {
+                    { "Title", coreProperties.Title },
+                    { "Author", coreProperties.Creator },
+                    { "Subject", coreProperties.Subject },
+                    { "Description", coreProperties.Description },
+                    { "Keywords", coreProperties.Keywords },
+                    { "LastModBy", coreProperties.LastModifiedBy },
+                    { "CreatedDate", coreProperties.Created?.ToString("o") },
+                    { "ModifiedDate", coreProperties.Modified?.ToString("o") }
+                };
 
-                metadata.Add("Title", coreProperties.Title!);
-                metadata.Add("Author", coreProperties.Creator!);
-                metadata.Add("Subject", coreProperties.Subject!);
-                metadata.Add("Description", coreProperties.Description!);
-                metadata.Add("Keywords", coreProperties.Keywords!);
-                metadata.Add("LastModBy", coreProperties.LastModifiedBy!);
-                metadata.Add("CreatedDate", coreProperties.Created?.ToString("o")!);
-                metadata.Add("ModifiedDate", coreProperties.Modified?.ToString("o")!);
+                Console.WriteLine("Core Properties:");
+                Console.WriteLine(string.Join(Environment.NewLine, metadata.Select(kv => $"{kv.Key}: {kv.Value}")));
 
                 var customProperties = wordDoc.ExtendedFilePropertiesPart?.Properties;
 
