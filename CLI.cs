@@ -93,6 +93,14 @@ namespace WordTemplate_BatchEdit
 
             meta_SingleFileCommand.SetHandler(async (singleFile, dump, output) =>
             {
+                try
+                {
+
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "");
+                }
                 await META_FileOps.META_SingleFile_GetMetaData(singleFile!, dump, output);
             }, singleFileOption, meta_dumpOption, meta_outputPathOption);
             #endregion Commands

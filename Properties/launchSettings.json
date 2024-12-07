@@ -2,7 +2,7 @@
   "profiles": {
     "WordTemplate_BatchEdit": {
       "commandName": "Project",
-      "commandLineArgs": "read --file C:\\Temp\\1.dotx --section header --search \"Klinikum Oberlausitzer Bergland\" --replace KOB"
+      "commandLineArgs": "meta --file D:\\dotx_editor_files\\Apotheke.dotx --dump true --output D:\\dotx_editor_files"
     }
   }
 }

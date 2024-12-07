@@ -1,4 +1,5 @@
 ﻿using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,10 +13,12 @@ namespace WordTemplate_BatchEdit.FileOps
     {
         public static async Task META_SingleFile_GetMetaData(FileInfo file, string dump, string output)
         {
+            string fileName = $"metadata_{file.Name}_{Random.Shared.Next()}.json";
+
             //if directory (as in: a valid FOLDER) doesnt exist, you'll create a file to dump it at that location. That way users cant specify an existing file, but who dumps into an already existing file anyway ?
             if (!Directory.Exists(output))
             {
-                output = Path.Combine(Directory.GetCurrentDirectory + $@"\metadata_{file.FullName}.json");
+                output = Directory.GetCurrentDirectory();
             }
 
             using (WordprocessingDocument wordDoc = WordprocessingDocument.Open(file.FullName, false))
@@ -40,23 +43,20 @@ namespace WordTemplate_BatchEdit.FileOps
 
                 var customProperties = wordDoc.ExtendedFilePropertiesPart?.Properties;
 
-                if (customProperties != null)
-                {
-                    Console.WriteLine("\nCustom Properties:");
-                    foreach (var property in customProperties.Elements<DocumentFormat.OpenXml.CustomProperties.CustomDocumentProperty>())
-                    {
-                        Console.WriteLine($"{property.Name}: {property.InnerText}");
-                        metadata.Add(property.Name!, property.InnerText!);
-                    }
-                }
-                else
+                if (customProperties.HasChildren == false)
                 {
                     Console.WriteLine("\nNo custom properties found.");
                 }
 
-                string json = JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText("metadata.json", json);
+                Console.WriteLine("\nCustom Properties:");
+                foreach (var property in customProperties.Elements<DocumentFormat.OpenXml.CustomProperties.CustomDocumentProperty>())
+                {
+                    Console.WriteLine($"{property.Name}: {property.InnerText}");
+                    metadata.Add(property.Name!, property.InnerText!);
+                }
 
+                string json = JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(Path.Combine(output, fileName), json);
             }
         }
     }
